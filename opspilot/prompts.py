@@ -51,7 +51,11 @@ PROCESSO = (
 # │  Dica: Um formato fixo facilita ler, comparar e AVALIAR respostas. Peça seções em markdown: Causa raiz, Evidências (lista com métrica ou linha de log), Sintomas vs. causa, Ação recomendada, Severidade (SEV1/2/3).
 # │  Copilot Chat: "Escreva a constante FORMATO como uma string que pede uma resposta em markdown com as seções Causa raiz, Evidências, Sintomas vs. causa, Ação recomendada e Severidade"
 # └─ Troque cada ___ abaixo. Gabarito: `make gabarito-aula AULA=1`
-FORMATO = ___
+FORMATO = (
+    "Responda em markdown usando as seguintes seções: Causa raiz, Evidências "
+    "(liste métricas ou linhas de log), Sintomas vs. causa, Ação recomendada e "
+    "Severidade (SEV1, SEV2 ou SEV3)."
+)
 
 RESTRICOES = (
     "- NUNCA invente números, horários ou linhas de log: cite apenas o que as "
