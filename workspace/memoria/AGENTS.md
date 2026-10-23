@@ -25,3 +25,5 @@
 
 ## Lições aprendidas (o agente acrescenta abaixo, 1 linha por lição)
 - Fila de notificações crescendo costuma ser efeito colateral de retries da API produtora.
+- CPU baixa na API com p95 alto e `PoolTimeout` costuma indicar gargalo em dependência/pool, não saturação local.
+- Mudanças de configuração de pool sem validação de `DB_POOL_MAX` podem reduzir o pool efetivo e derrubar checkout por contenção em pgbouncer.
