@@ -70,12 +70,18 @@ def invocar_com_trace(
     from langfuse import propagate_attributes
     from langfuse.langchain import CallbackHandler
 
-    # [A4-L1] ✔ Plugue o Langfuse no LangChain/LangGraph
+    # ┌─ LACUNA [A4-L1] Plugue o Langfuse no LangChain/LangGraph
+    # │  Dica: Crie um CallbackHandler() e coloque-o na lista config["callbacks"]. Tudo que rodar com esse config vira um trace automaticamente.
+    # │  Copilot Chat: "Crie handler = CallbackHandler() e adicione em config["callbacks"] como uma lista"
+    # └─ Troque cada ___ abaixo. Gabarito: `make gabarito-aula AULA=4`
     handler = CallbackHandler()
     config["callbacks"] = [handler]
 
     with langfuse.start_as_current_observation(as_type="span", name=nome, input={"pergunta": pergunta}) as span:
-        # [A4-L2] ✔ Carimbe o trace com contexto de negócio
+        # ┌─ LACUNA [A4-L2] Carimbe o trace com contexto de negócio
+        # │  Dica: propagate_attributes(...) é um context manager. Passe session_id, user_id, tags e version=VERSAO_PROMPT — assim você filtra no painel por versão de prompt.
+        # │  Copilot Chat: "Abra um with propagate_attributes passando session_id, user_id, tags (ou lista vazia) e version=VERSAO_PROMPT"
+        # └─ Troque cada ___ abaixo. Gabarito: `make gabarito-aula AULA=4`
         with propagate_attributes(session_id=session_id, user_id=user_id, tags=tags or [], version=VERSAO_PROMPT):
             estado = agente.invoke({"messages": [{"role": "user", "content": pergunta}]}, config=config)
         resposta = texto_de(estado["messages"][-1])
@@ -95,7 +101,10 @@ def registrar_nota(trace_id: str | None, nome: str, valor: float, comentario: st
     langfuse = cliente_langfuse()
     if langfuse is None or trace_id is None:
         return
-    # [A4-L5] ✔ Ligue a avaliação ao trace
+    # ┌─ LACUNA [A4-L5] Ligue a avaliação ao trace
+    # │  Dica: langfuse.create_score(...) recebe trace_id, name, value (float) e comment.
+    # │  Copilot Chat: "Chame langfuse.create_score com trace_id, name=nome, value=float(valor) e comment=comentario"
+    # └─ Troque cada ___ abaixo. Gabarito: `make gabarito-aula AULA=4`
     langfuse.create_score(trace_id=trace_id, name=nome, value=float(valor), comment=comentario)
 
 
