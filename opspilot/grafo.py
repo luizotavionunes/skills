@@ -101,6 +101,7 @@ class EstadoOps(TypedDict):
     erros_validacao: NotRequired[list[str]]
     ticket_aprovado: NotRequired[bool]
     ticket: NotRequired[str | None]
+    evidencias_runbook: NotRequired[str]
 
 
 # --------------------------------------------------------------------------- #
@@ -176,7 +177,13 @@ def classificar(estado: EstadoOps) -> dict:
     classificador = _llm().with_structured_output(Classificacao)
     resultado: Classificacao = classificador.invoke(
         [
-            SystemMessage(PROMPT_CLASSIFICADOR.format(servicos=", ".join(servicos_conhecidos()))),
+            SystemMessage(
+                PROMPT_CLASSIFICADOR.format(servicos=", ".join(servicos_conhecidos()))
+                + "\n\nClassifique como incidente quando houver relato de falha ou degradação operacional atual. "
+                "Isso inclui filas acumulando mensagens, backlog, atrasos de processamento, erros ou "
+                "indisponibilidade; não classifique esses relatos como dúvida só porque mencionam um serviço. "
+                "Dúvida é uma pergunta geral de procedimento sem sintoma operacional em curso."
+            ),
             HumanMessage(_pergunta_original(estado)),
         ]
     )
@@ -196,7 +203,11 @@ def responder_duvida(estado: EstadoOps) -> dict:
             HumanMessage(pergunta),
         ]
     )
-    return {"messages": [AIMessage(texto_de(resposta))]}
+    return {
+        "messages": [AIMessage(texto_de(resposta))],
+        # Preserva o contexto recuperado no estado final para auditoria e avaliação externa.
+        "evidencias_runbook": contexto,
+    }
 
 
 def recusar(estado: EstadoOps) -> dict:
@@ -217,7 +228,11 @@ def investigar(estado: EstadoOps) -> dict:
     instrucao = SystemMessage(
         montar_prompt_sistema()
         + "\n\nNesta etapa você SÓ investiga (não abra tickets). Quando tiver evidências "
-        "suficientes, escreva o diagnóstico no formato pedido, sem chamar ferramentas."
+        "suficientes, escreva o diagnóstico no formato pedido, sem chamar ferramentas. "
+        "Investigue a cadeia de dependências do serviço afetado: consulte métricas e logs dos "
+        "componentes relacionados, diferencie sintomas de causa raiz e fundamente a causa raiz "
+        "em evidências observadas. Não encerre a investigação apenas identificando o serviço "
+        "onde o sintoma aparece."
     )
     resposta = modelo.invoke([instrucao, *estado["messages"]])
     return {"messages": [resposta]}
